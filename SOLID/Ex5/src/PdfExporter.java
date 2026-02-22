@@ -3,6 +3,7 @@ import java.nio.charset.StandardCharsets;
 public class PdfExporter extends Exporter {
     @Override
     public ExportResult export(ExportRequest req) {
+        validateRequest(req);
         String body = req.body == null ? "" : req.body;
         if (body.length() > 20) {
             String msg = "PDF cannot handle content > 20 chars";
