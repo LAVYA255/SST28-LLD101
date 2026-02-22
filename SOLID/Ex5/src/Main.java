@@ -15,6 +15,10 @@ public class Main {
     private static String safe(Exporter e, ExportRequest r) {
         try {
             ExportResult out = e.export(r);
+            String content = new String(out.bytes);
+            if (content.startsWith("PDF cannot handle")) {
+                return "ERROR: " + content;
+            }
             return "OK bytes=" + out.bytes.length;
         } catch (RuntimeException ex) {
             return "ERROR: " + ex.getMessage();
