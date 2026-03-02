@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.management.RuntimeErrorException;
+
 /**
  * INTENTION: Global metrics registry (should be a Singleton).
  *
@@ -21,7 +23,7 @@ import java.util.Map;
  *  3) Preserve singleton on serialization (readResolve)
  */
 public class MetricsRegistry implements Serializable {
-
+    private static boolean isCreated=false;
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -29,18 +31,30 @@ public class MetricsRegistry implements Serializable {
     private final Map<String, Long> counters = new HashMap<>();
 
     // BROKEN: should be private and should prevent second construction
-    public MetricsRegistry() {
+    private MetricsRegistry() {
         // intentionally empty
+        if(isCreated){
+            throw new RuntimeException("ERROR AGYA BHAI");
+        }
+        isCreated=true;
     }
 
     // BROKEN: racy lazy init; two threads can create two instances
-    public static MetricsRegistry getInstance() {
+    public static synchronized MetricsRegistry getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new MetricsRegistry();
+            synchronized(MetricsRegistry.class){
+                if(INSTANCE==null){
+                    INSTANCE = new MetricsRegistry();
+                }
+            }
         }
         return INSTANCE;
     }
 
+    @Serial
+    protected Object readResolve() {
+        return getInstance(); 
+    }
     public synchronized void setCount(String key, long value) {
         counters.put(key, value);
     }
