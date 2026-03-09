@@ -8,7 +8,7 @@ package com.example.reports;
  * - caching of RealReport within the same proxy
  */
 public class ReportProxy implements Report {
-
+    private RealReport realReport;
     private final String reportId;
     private final String title;
     private final String classification;
@@ -22,9 +22,15 @@ public class ReportProxy implements Report {
 
     @Override
     public void display(User user) {
-        // Starter placeholder: intentionally incorrect.
-        // Students should remove direct real loading on every call.
-        RealReport report = new RealReport(reportId, title, classification);
-        report.display(user);
+        if(!accessControl.canAccess(user, this.classification)){
+            System.out.println("ACCESS DENIED");
+            return;
+        }
+
+        if(realReport == null){
+            realReport = new RealReport(this.reportId, this.title, this.classification);
+        }
+
+        realReport.display(user);
     }
 }
